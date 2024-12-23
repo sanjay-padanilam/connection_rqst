@@ -4,20 +4,21 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-final registrationScreenStateProvider = StateNotifierProvider<
-    RegistrationScreenStateNotifier,
-    RegistrationScreenState>((ref) => RegistrationScreenStateNotifier());
+final RegistratonStateProvider = StateNotifierProvider(
+  (ref) => RegistrationScreenStateNotifier(),
+);
 
 class RegistrationScreenStateNotifier
     extends StateNotifier<RegistrationScreenState> {
   RegistrationScreenStateNotifier() : super(RegistrationScreenState());
 
-  Future<void> onRegistration({
+  Future<bool> onRegistration({
     required String email,
     required String password,
     required BuildContext context,
   }) async {
     state = state.copyWith(isLoading: true);
+
     try {
       final credential =
           await FirebaseAuth.instance.createUserWithEmailAndPassword(
@@ -26,19 +27,21 @@ class RegistrationScreenStateNotifier
       );
 
       if (credential.user?.uid != null) {
+        // Uncomment the following lines if you wish to store the user in Firestore:
         // FirebaseFirestore.instance
         //     .collection("user")
-        //     .doc(credential.user!.uid.toString())
+        //     .doc(credential.user!.uid)
         //     .set({
-        //   "id": "${credential.user!.uid.toString()}",
-        //   'email': '${credential.user!.email.toString()}'
+        //   "id": credential.user!.uid,
+        //   'email': credential.user!.email,
         // });
 
         SnackbarUrils.showOntimeSnackbar(
-          message: "Registration Successfully",
+          message: "Registration Successful",
           context: context,
           backgroundColor: Colors.green,
         );
+        return true;
       }
     } on FirebaseAuthException catch (e) {
       if (e.code == 'weak-password') {
@@ -59,11 +62,14 @@ class RegistrationScreenStateNotifier
       }
     } catch (e) {
       SnackbarUrils.showOntimeSnackbar(
-        message: e.toString(),
+        message: 'An unexpected error occurred: ${e.toString()}',
         context: context,
       );
     } finally {
       state = state.copyWith(isLoading: false);
     }
+
+    // Return false if the function didn't exit successfully earlier
+    return false;
   }
 }

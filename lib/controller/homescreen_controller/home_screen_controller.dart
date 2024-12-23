@@ -9,43 +9,58 @@ import 'package:http/http.dart' as http;
 final homeScreenStateProvider = StateNotifierProvider(
   (ref) => HomeScreenStateNotifier(),
 );
-List<Map> allcatagortylist = [];
-List cataorylist = [];
-List<Productmodel> productlist = [];
 
 class HomeScreenStateNotifier extends StateNotifier<HomeScreenState> {
   HomeScreenStateNotifier() : super(HomeScreenState());
 
-  Future<void> getcatagories() async {
-    final catagoryUrl =
+  Future<void> getCategories() async {
+    state = state.copyWith(isLoading: true);
+
+    final categoryUrl =
         Uri.parse("https://fakestoreapi.com/products/categories");
+
     try {
-      var responce = await http.get(catagoryUrl);
-      if (responce.statusCode == 200) {
-        log(responce.statusCode.toString());
-        state = state.copyWith(catagories: jsonDecode(responce.body));
+      final response = await http.get(categoryUrl);
+
+      if (response.statusCode == 200) {
+        log("Categories fetched successfully: ${response.statusCode}");
+        state = state.copyWith(catagories: jsonDecode(response.body));
+      } else {
+        log("Failed to fetch categories: ${response.statusCode}");
       }
     } catch (e) {
-      print(e);
+      log("Error fetching categories: $e");
+    } finally {
+      state = state.copyWith(isLoading: false);
     }
   }
 
-  Future<void> getallProducts({String? catagoryindex}) async {
-    final GetallproductsUrl = Uri.parse("https://fakestoreapi.com/products");
-    final catagorywiseurl =
-        Uri.parse("https://fakestoreapi.com/products/category/$catagoryindex");
+  Future<void> getAllProducts({String? categoryIndex}) async {
+    state = state.copyWith(isLoading: true);
+
+    final getAllProductsUrl = Uri.parse("https://fakestoreapi.com/products");
+    final categoryWiseUrl =
+        Uri.parse("https://fakestoreapi.com/products/category/$categoryIndex");
 
     try {
-      var responce = await http.get(
-          catagoryindex == null || catagoryindex == "All"
-              ? GetallproductsUrl
-              : catagorywiseurl);
-      if (responce.statusCode == 200) {
+      final response = await http.get(
+        (categoryIndex == null || categoryIndex == "All")
+            ? getAllProductsUrl
+            : categoryWiseUrl,
+      );
+
+      if (response.statusCode == 200) {
+        log("Products fetched successfully: ${response.statusCode}");
         state = state.copyWith(
-            productlist: productlistresponsemodelFromJson(responce.body));
+          productlist: productlistresponsemodelFromJson(response.body),
+        );
+      } else {
+        log("Failed to fetch products: ${response.statusCode}");
       }
     } catch (e) {
-      print(e);
+      log("Error fetching products: $e");
+    } finally {
+      state = state.copyWith(isLoading: false);
     }
   }
 }

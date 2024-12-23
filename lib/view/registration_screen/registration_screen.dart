@@ -1,4 +1,6 @@
 import 'package:connection_rqst/controller/registration_controller/registration_controller.dart';
+import 'package:connection_rqst/controller/registration_controller/registration_state.dart';
+import 'package:connection_rqst/view/homescreen/homescreen.dart';
 import 'package:connection_rqst/view/login_screen/login_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -12,7 +14,8 @@ class RegistrationScreen extends ConsumerWidget {
     final emailController = TextEditingController();
     final passwordController = TextEditingController();
     final repasswordController = TextEditingController();
-    final registrationscreenstate = ref.watch(registrationScreenStateProvider);
+    final registrationscreenstate =
+        ref.watch(RegistratonStateProvider) as RegistrationScreenState;
 
     return Scaffold(
       body: Container(
@@ -129,12 +132,23 @@ class RegistrationScreen extends ConsumerWidget {
                                   if (_formKey.currentState!.validate()) {
                                     // Handle registration logic here
                                     await ref
-                                        .read(registrationScreenStateProvider
-                                            .notifier)
+                                        .read(RegistratonStateProvider.notifier)
                                         .onRegistration(
                                             email: emailController.text,
                                             password: passwordController.text,
-                                            context: context);
+                                            context: context)
+                                        .then(
+                                      (value) {
+                                        if (value == true) {
+                                          Navigator.pushReplacement(
+                                              context,
+                                              MaterialPageRoute(
+                                                builder: (context) =>
+                                                    Homescreen(),
+                                              ));
+                                        }
+                                      },
+                                    );
                                   }
                                 },
                                 style: ElevatedButton.styleFrom(
