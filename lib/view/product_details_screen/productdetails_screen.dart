@@ -195,6 +195,31 @@ class _ProductdetailsScreenState extends ConsumerState<ProductdetailsScreen> {
                           InkWell(
                             onTap: () async {
                               final user = FirebaseAuth.instance.currentUser;
+                              final userId = user!.uid;
+
+                              await FirebaseFirestore.instance
+                                  .collection('user') // The collection
+                                  .doc(
+                                      userId) // The document with the user's ID
+                                  .update({
+                                'status': 'pending',
+                                'admin1Status': 'pending',
+                                'admin2Status': 'pending',
+                                'timestamp': DateTime.now(),
+                              }).then((_) {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(
+                                    content: Text('Order placed successfully!'),
+                                  ),
+                                );
+                              }).catchError((error) {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(
+                                    content:
+                                        Text('Failed to place order: $error'),
+                                  ),
+                                );
+                              });
 
                               if (user != null) {
                                 try {
@@ -249,11 +274,11 @@ class _ProductdetailsScreenState extends ConsumerState<ProductdetailsScreen> {
                                 );
                               }
 
-                              Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                    builder: (context) => StatusScreen(),
-                                  ));
+                              // Navigator.push(
+                              //     context,
+                              //     MaterialPageRoute(
+                              //       builder: (context) => StatusScreen(),
+                              //     ));
                             },
                             child: Container(
                               height: 50,
