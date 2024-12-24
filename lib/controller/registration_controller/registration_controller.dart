@@ -1,3 +1,4 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:connection_rqst/controller/registration_controller/registration_state.dart';
 import 'package:connection_rqst/utils/snackbar_utils.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -28,19 +29,20 @@ class RegistrationScreenStateNotifier
 
       if (credential.user?.uid != null) {
         // Uncomment the following lines if you wish to store the user in Firestore:
-        // FirebaseFirestore.instance
-        //     .collection("user")
-        //     .doc(credential.user!.uid)
-        //     .set({
-        //   "id": credential.user!.uid,
-        //   'email': credential.user!.email,
-        // });
+        FirebaseFirestore.instance
+            .collection("user")
+            .doc(credential.user!.uid)
+            .set({
+          "id": credential.user!.uid,
+          'email': credential.user!.email,
+        });
 
         SnackbarUrils.showOntimeSnackbar(
           message: "Registration Successful",
           context: context,
           backgroundColor: Colors.green,
         );
+
         return true;
       }
     } on FirebaseAuthException catch (e) {

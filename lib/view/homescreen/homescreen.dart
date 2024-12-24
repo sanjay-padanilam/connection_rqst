@@ -15,7 +15,6 @@ class _HomescreenState extends ConsumerState<Homescreen> {
   void initState() {
     WidgetsBinding.instance.addPostFrameCallback(
       (timeStamp) async {
-        await ref.read(homeScreenStateProvider.notifier).getCategories();
         await ref.read(homeScreenStateProvider.notifier).getAllProducts();
       },
     );

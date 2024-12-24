@@ -1,6 +1,9 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:connection_rqst/controller/product_details_screen_controller.dart/product_details_controller.dart';
 import 'package:connection_rqst/controller/product_details_screen_controller.dart/product_details_state.dart';
+import 'package:connection_rqst/view/status_screen/status_screen.dart';
 import 'package:custom_rating_bar/custom_rating_bar.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -14,21 +17,23 @@ class ProductdetailsScreen extends ConsumerStatefulWidget {
 }
 
 class _ProductdetailsScreenState extends ConsumerState<ProductdetailsScreen> {
+  @override
   void initState() {
+    super.initState();
     WidgetsBinding.instance.addPostFrameCallback(
-      (timeStamp) async {
+      (_) async {
         await ref
             .read(ProductdetailsProvider.notifier)
             .getProductdetails(widget.id);
       },
     );
-    super.initState();
   }
 
   @override
   Widget build(BuildContext context) {
     final productdetailsstate =
         ref.watch(ProductdetailsProvider) as ProductDetailsState;
+
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Colors.deepPurple.shade300,
@@ -44,23 +49,28 @@ class _ProductdetailsScreenState extends ConsumerState<ProductdetailsScreen> {
           ),
         ),
         child: productdetailsstate.isLoading
-            ? CircularProgressIndicator.adaptive()
+            ? Center(
+                child: CircularProgressIndicator.adaptive(),
+              )
             : Padding(
                 padding: const EdgeInsets.all(20),
                 child: SingleChildScrollView(
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.spaceAround,
                     children: [
+                      // Product Image Section
                       Stack(
                         children: [
                           Container(
                             height: 450,
                             width: double.infinity,
                             decoration: BoxDecoration(
-                                image: DecorationImage(
-                                    image: NetworkImage(productdetailsstate
-                                        .productdetails!.image
-                                        .toString()))),
+                              image: DecorationImage(
+                                image: NetworkImage(
+                                    productdetailsstate.productdetails?.image ??
+                                        ''),
+                              ),
+                            ),
                           ),
                           Positioned(
                             top: 20,
@@ -74,132 +84,98 @@ class _ProductdetailsScreenState extends ConsumerState<ProductdetailsScreen> {
                             ),
                           ),
                           Positioned(
-                              right: 60,
-                              top: 36,
-                              child: Icon(
-                                Icons.favorite_border_outlined,
-                                color: Colors.black,
-                                weight: 30,
-                              ))
+                            right: 60,
+                            top: 36,
+                            child: Icon(
+                              Icons.favorite_border_outlined,
+                              color: Colors.black,
+                              size: 30,
+                            ),
+                          )
                         ],
                       ),
-                      Container(
-                        child: Column(
-                          children: [
-                            Text(
-                              productdetailsstate.productdetails!.title
-                                  .toString(),
-                              style: TextStyle(
-                                  color: Colors.black,
+
+                      // Product Details Section
+                      Column(
+                        children: [
+                          Text(
+                            productdetailsstate.productdetails?.title ?? '',
+                            style: TextStyle(
+                              color: Colors.black,
+                              fontWeight: FontWeight.bold,
+                              fontSize: 15,
+                            ),
+                          ),
+                          SizedBox(height: 10),
+                          Row(
+                            children: [
+                              RatingBar.readOnly(
+                                size: 20,
+                                filledIcon: Icons.star,
+                                emptyIcon: Icons.star_border,
+                                initialRating: productdetailsstate
+                                        .productdetails?.rating?.rate ??
+                                    0,
+                                maxRating: 5,
+                              ),
+                              SizedBox(width: 10),
+                              Text(
+                                "${productdetailsstate.productdetails?.rating?.count ?? 0}/rating",
+                                style: TextStyle(
+                                  color: Colors.amber,
+                                  fontSize: 16,
                                   fontWeight: FontWeight.bold,
-                                  fontSize: 15),
-                            ),
-                            SizedBox(
-                              height: 2,
-                            ),
-                            Row(
-                              children: [
-                                RatingBar.readOnly(
-                                  size: 20,
-                                  filledIcon: Icons.star,
-                                  emptyIcon: Icons.star_border,
-                                  initialRating: productdetailsstate
-                                          .productdetails!.rating!.rate ??
-                                      0,
-                                  maxRating: 5,
                                 ),
-                                SizedBox(
-                                  width: 10,
+                              ),
+                            ],
+                          ),
+                          SizedBox(height: 15),
+                          Text(
+                            productdetailsstate.productdetails?.description ??
+                                '',
+                            maxLines: 3,
+                            textAlign: TextAlign.justify,
+                          ),
+                          SizedBox(height: 20),
+                          Row(
+                            children: [
+                              Text(
+                                "Choose size",
+                                style: TextStyle(
+                                  color: Colors.black,
+                                  fontSize: 19,
+                                  fontWeight: FontWeight.bold,
                                 ),
-                                Text(
-                                  "${productdetailsstate.productdetails!.rating!.count}/rating",
-                                  style: TextStyle(
-                                      color: Colors.amber,
-                                      fontSize: 16,
-                                      fontWeight: FontWeight.bold),
-                                )
-                              ],
-                            ),
-                            SizedBox(
-                              height: 15,
-                            ),
-                            Text(
-                                maxLines: 3,
-                                textAlign: TextAlign.justify,
-                                productdetailsstate.productdetails!.description
-                                    .toString()),
-                            SizedBox(
-                              height: 20,
-                            ),
-                            Row(
-                              children: [
-                                Text(
-                                  "choose size",
-                                  style: TextStyle(
-                                      color: Colors.black,
-                                      fontSize: 19,
-                                      fontWeight: FontWeight.bold),
+                              ),
+                            ],
+                          ),
+                          Row(
+                            children: ['S', 'M', 'L'].map((size) {
+                              return Padding(
+                                padding: const EdgeInsets.only(right: 10),
+                                child: Container(
+                                  height: 50,
+                                  width: 50,
+                                  decoration: BoxDecoration(
+                                    border: Border.all(color: Colors.black),
+                                  ),
+                                  child: Center(
+                                    child: Text(
+                                      size,
+                                      style: TextStyle(
+                                          fontWeight: FontWeight.bold,
+                                          fontSize: 20),
+                                    ),
+                                  ),
                                 ),
-                              ],
-                            ),
-                            Row(
-                              children: [
-                                Container(
-                                    child: Center(
-                                      child: Text(
-                                        "S",
-                                        style: TextStyle(
-                                            fontWeight: FontWeight.bold,
-                                            fontSize: 20),
-                                      ),
-                                    ),
-                                    height: 50,
-                                    width: 50,
-                                    decoration: BoxDecoration(
-                                      border: Border.all(color: Colors.black),
-                                    )),
-                                SizedBox(width: 10),
-                                Container(
-                                    child: Center(
-                                      child: Text(
-                                        "M",
-                                        style: TextStyle(
-                                            fontWeight: FontWeight.bold,
-                                            fontSize: 20),
-                                      ),
-                                    ),
-                                    height: 50,
-                                    width: 50,
-                                    decoration: BoxDecoration(
-                                      border: Border.all(
-                                        width: 1,
-                                        color: const Color.fromARGB(
-                                            255, 49, 48, 48),
-                                      ),
-                                    )),
-                                SizedBox(width: 10),
-                                Container(
-                                    child: Center(
-                                      child: Text(
-                                        "L",
-                                        style: TextStyle(
-                                            fontWeight: FontWeight.bold,
-                                            fontSize: 20),
-                                      ),
-                                    ),
-                                    height: 50,
-                                    width: 50,
-                                    decoration: BoxDecoration(
-                                      border: Border.all(color: Colors.black),
-                                    ))
-                              ],
-                            )
-                          ],
-                        ),
+                              );
+                            }).toList(),
+                          ),
+                        ],
                       ),
-                      SizedBox(
-                        height: 20,
-                      ),
+                      SizedBox(height: 20),
+
+                      // Price and Buy Now Section
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
@@ -207,57 +183,104 @@ class _ProductdetailsScreenState extends ConsumerState<ProductdetailsScreen> {
                             children: [
                               Text("Price"),
                               Text(
-                                "\$ ${productdetailsstate.productdetails!.price.toString()}",
+                                "\$ ${productdetailsstate.productdetails?.price.toString() ?? '0.00'}",
                                 style: TextStyle(
-                                    color: Colors.black,
-                                    fontWeight: FontWeight.bold,
-                                    fontSize: 25),
-                              )
+                                  color: Colors.black,
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 25,
+                                ),
+                              ),
                             ],
                           ),
                           InkWell(
-                            onTap: () {
-                              // context
-                              //     .read<CartScreenController>()
-                              //     .addProduct(productdetailscontroller.product!);
-                              // context.read<CartScreenController>().getAllProducts();
+                            onTap: () async {
+                              final user = FirebaseAuth.instance.currentUser;
 
-                              // Navigator.push(
-                              //     context,
-                              //     MaterialPageRoute(
-                              //       builder: (context) => Cartscreen(),
-                              //     ));
+                              if (user != null) {
+                                try {
+                                  final docRef = FirebaseFirestore.instance
+                                      .collection("user")
+                                      .doc(user.uid);
+
+                                  // Fetch the document to check if it exists
+                                  final docSnapshot = await docRef.get();
+                                  if (docSnapshot.exists) {
+                                    // Document exists, perform an update
+                                    await docRef.update({
+                                      'productId': FieldValue.arrayUnion([
+                                        productdetailsstate.productdetails?.id
+                                            .toString()
+                                      ]), // Use `arrayUnion` to avoid duplicates in an array
+                                    });
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      SnackBar(
+                                        content: Text(
+                                            "Product updated successfully!"),
+                                      ),
+                                    );
+                                  } else {
+                                    // Document does not exist, create it
+                                    await docRef.set({
+                                      'productId': [
+                                        productdetailsstate.productdetails?.id
+                                            .toString()
+                                      ],
+                                    });
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      SnackBar(
+                                        content:
+                                            Text("Product added successfully!"),
+                                      ),
+                                    );
+                                  }
+                                } catch (e) {
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    SnackBar(
+                                      content:
+                                          Text("Failed to update product: $e"),
+                                    ),
+                                  );
+                                }
+                              } else {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(
+                                    content: Text("User not logged in"),
+                                  ),
+                                );
+                              }
+
+                              Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) => StatusScreen(),
+                                  ));
                             },
                             child: Container(
                               height: 50,
                               width: 150,
                               decoration: BoxDecoration(
-                                  color: Colors.black,
-                                  borderRadius: BorderRadius.circular(10)),
+                                color: Colors.black,
+                                borderRadius: BorderRadius.circular(10),
+                              ),
                               child: Row(
                                 children: [
-                                  SizedBox(
-                                    width: 25,
-                                  ),
+                                  SizedBox(width: 25),
                                   Icon(
                                     Icons.local_mall_outlined,
                                     color: Colors.white,
                                   ),
-                                  SizedBox(
-                                    width: 5,
-                                  ),
+                                  SizedBox(width: 5),
                                   Text(
-                                    "add to cart",
+                                    "Buy Now",
                                     style: TextStyle(color: Colors.white),
-                                  )
+                                  ),
                                 ],
                               ),
                             ),
-                          )
+                          ),
                         ],
-                      )
-                    ] //colums
-                    ,
+                      ),
+                    ],
                   ),
                 ),
               ),
