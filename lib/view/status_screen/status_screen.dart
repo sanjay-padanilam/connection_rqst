@@ -39,6 +39,7 @@ class _HomepageState extends ConsumerState<StatusPage> {
               itemBuilder: (context, index) {
                 final order = orders[index];
                 return ListTile(
+                  leading: Image.network(order.imageUrl),
                   title: Text('Product ID: ${order.productId}'),
                   subtitle: Text(
                       'Quantity: ${order.quantity}\nStatus: ${order.status}'),
