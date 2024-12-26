@@ -1,83 +1,80 @@
-import 'dart:developer';
-
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:connection_rqst/controller/homescreen_controller/home_screen_controller.dart';
 import 'package:connection_rqst/controller/status_screen_controller/status_screen_controller.dart';
-import 'package:connection_rqst/controller/status_screen_controller/status_screen_state.dart';
+import 'package:connection_rqst/model/oder_model.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-class StatusScreen extends ConsumerStatefulWidget {
-  StatusScreen({
-    super.key,
-  });
+class StatusPage extends ConsumerStatefulWidget {
+  const StatusPage({super.key});
 
   @override
-  ConsumerState<ConsumerStatefulWidget> createState() => _StatusScreenState();
+  ConsumerState<ConsumerStatefulWidget> createState() => _HomepageState();
 }
 
-class _StatusScreenState extends ConsumerState<StatusScreen> {
-  void initState() {
-    WidgetsBinding.instance.addPostFrameCallback(
-      (timeStamp) async {
-        await ref.read(homeScreenStateProvider.notifier).getAllProducts();
-      },
-    );
-    super.initState();
-  }
-
-  final Stream<QuerySnapshot> _userStream =
-      FirebaseFirestore.instance.collection('user').snapshots();
-
+class _HomepageState extends ConsumerState<StatusPage> {
+  final User? user = FirebaseAuth.instance.currentUser;
   @override
   Widget build(BuildContext context) {
-    final statusscreenstate =
-        ref.watch(StatusStateProvider) as StatusScreenState;
-    return StreamBuilder(
-      stream: _userStream,
-      builder: (context, snapshot) {
-        if (snapshot.hasError) {
-          return const Center(
-            child: Text('Something went wrong'),
-          );
-        }
+    return Scaffold(
+        backgroundColor: Colors.deepPurple.shade400,
+        appBar: AppBar(
+          backgroundColor: Colors.deepPurple.shade400,
+          title: Text('Order List'),
+        ),
+        body: StreamBuilder<List<OrderModel>>(
+          stream: ref
+              .read(StatusStateProvider.notifier)
+              .fetchUserOrders(user!.uid.toString()),
+          builder: (context, snapshot) {
+            if (snapshot.connectionState == ConnectionState.waiting) {
+              return CircularProgressIndicator();
+            }
+            if (snapshot.hasError || !snapshot.hasData) {
+              return Text('Error fetching orders ${snapshot.error}');
+            }
 
-        if (snapshot.connectionState == ConnectionState.waiting) {
-          return const Center(
-            child: CircularProgressIndicator.adaptive(),
-          );
-        }
-
-        if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
-          return const Center(
-            child: Text('No services available'),
-          );
-        }
-
-        if (snapshot.hasData) {
-          return Scaffold(
-            appBar: AppBar(),
-            body: Container(
-              height: double.infinity,
-              width: double.infinity,
-              child: ListView.builder(
-                itemCount: statusscreenstate.data!.length,
-                itemBuilder: (context, index) {
-                  final productlist = snapshot.data!.docs;
-                  final productid = productlist[index]["productid"];
-                  log(productid);
-
-                  return ListTile(
-                    title:
-                        Text(statusscreenstate.data![index].title.toString()),
-                  );
-                },
-              ),
-            ),
-          );
-        }
-        return SizedBox();
-      },
-    );
+            final orders = snapshot.data!;
+            return ListView.builder(
+              itemCount: orders.length,
+              itemBuilder: (context, index) {
+                final order = orders[index];
+                return ListTile(
+                  title: Text('Product ID: ${order.productId}'),
+                  subtitle: Text(
+                      'Quantity: ${order.quantity}\nStatus: ${order.status}'),
+                  trailing: order.status.toLowerCase() == 'approved'
+                      ? Container(
+                          color: Colors.green,
+                          child: Text("Order Approved"),
+                        )
+                      : order.status.toLowerCase() == 'rejected'
+                          ? Container(
+                              color: Colors.red,
+                              child: Text("Order Rejected"),
+                            )
+                          : Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                // ElevatedButton(
+                                //   onPressed: () => ref
+                                //       .read(homePageStateNotifierProvider
+                                //           .notifier)
+                                //       .updateOrderStatus(order.id, 'approved'),
+                                //   child: Text('Approve'),
+                                // ),
+                                // ElevatedButton(
+                                //   onPressed: () => ref
+                                //       .read(homePageStateNotifierProvider
+                                //           .notifier)
+                                //       .updateOrderStatus(order.id, 'rejected'),
+                                //   child: Text('Reject'),
+                                // ),
+                              ],
+                            ),
+                );
+              },
+            );
+          },
+        ));
   }
 }

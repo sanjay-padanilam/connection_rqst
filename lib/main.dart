@@ -1,5 +1,6 @@
 import 'package:connection_rqst/firebase_options.dart';
-import 'package:connection_rqst/view/registration_screen/registration_screen.dart';
+
+import 'package:connection_rqst/view/status_screen/status_screen.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -18,7 +19,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      home: RegistrationScreen(),
+      home: StatusPage(),
     );
   }
 }

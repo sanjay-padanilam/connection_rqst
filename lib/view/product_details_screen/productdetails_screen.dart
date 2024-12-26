@@ -200,19 +200,25 @@ class _ProductdetailsScreenState extends ConsumerState<ProductdetailsScreen> {
 
                               User? user = FirebaseAuth.instance.currentUser;
 
-                              ref
-                                  .read(ProductdetailsProvider.notifier)
-                                  .onuserdocOrder(
-                                      id: user!.uid.toString(),
-                                      productId: productdetailsstate
-                                          .productdetails!.id
-                                          .toString(),
-                                      status: 'pendng');
+                              // ref
+                              //     .read(ProductdetailsProvider.notifier)
+                              //     .onuserdocOrder(
+                              //         id: user!.uid.toString(),
+                              //         productId: productdetailsstate
+                              //             .productdetails!.id
+                              //             .toString(),
+                              //         status: 'pendng');
 
                               ref
                                   .read(ProductdetailsProvider.notifier)
                                   .addOrder(
-                                      id: user!.uid.toString(),
+                                      itmeName: productdetailsstate
+                                          .productdetails!.title
+                                          .toString(),
+                                      imageUrl: productdetailsstate
+                                          .productdetails!.image
+                                          .toString(),
+                                      userId: user!.uid.toString(),
                                       productId: productdetailsstate
                                           .productdetails!.id
                                           .toString(),
