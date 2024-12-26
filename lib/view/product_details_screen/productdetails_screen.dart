@@ -1,7 +1,5 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:connection_rqst/controller/product_details_screen_controller.dart/product_details_controller.dart';
 import 'package:connection_rqst/controller/product_details_screen_controller.dart/product_details_state.dart';
-import 'package:connection_rqst/view/status_screen/status_screen.dart';
 import 'package:custom_rating_bar/custom_rating_bar.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
@@ -201,6 +199,15 @@ class _ProductdetailsScreenState extends ConsumerState<ProductdetailsScreen> {
                               //     ));
 
                               User? user = FirebaseAuth.instance.currentUser;
+
+                              ref
+                                  .read(ProductdetailsProvider.notifier)
+                                  .onuserdocOrder(
+                                      id: user!.uid.toString(),
+                                      productId: productdetailsstate
+                                          .productdetails!.id
+                                          .toString(),
+                                      status: 'pendng');
 
                               ref
                                   .read(ProductdetailsProvider.notifier)
