@@ -16,7 +16,7 @@ class _HomepageState extends ConsumerState<StatusPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        backgroundColor: Colors.deepPurple.shade400,
+        backgroundColor: Colors.deepPurple.shade200,
         appBar: AppBar(
           backgroundColor: Colors.deepPurple.shade400,
           title: Text('Order List'),
@@ -38,22 +38,49 @@ class _HomepageState extends ConsumerState<StatusPage> {
               itemCount: orders.length,
               itemBuilder: (context, index) {
                 final order = orders[index];
-                return ListTile(
-                  leading: Image.network(order.imageUrl),
-                  title: Text('Product ID: ${order.productId}'),
-                  subtitle: Text(
-                      'Quantity: ${order.quantity}\nStatus: ${order.status}'),
-                  trailing: order.status.toLowerCase() == 'approved'
-                      ? Container(
-                          color: Colors.green,
-                          child: Text("Order Approved"),
-                        )
-                      : order.status.toLowerCase() == 'rejected'
-                          ? Container(
-                              color: Colors.red,
-                              child: Text("Order Rejected"),
-                            )
-                          : Container(),
+                return Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: Column(
+                    children: [
+                      ListTile(
+                        leading: Image.network(order.imageUrl),
+                        title: Text(
+                          ' ${order.itemName}',
+                          style: TextStyle(fontWeight: FontWeight.bold),
+                        ),
+                        subtitle: Text(
+                          'Quantity: ${order.quantity}\nStatus: ${order.status}',
+                          style: TextStyle(fontWeight: FontWeight.bold),
+                        ),
+                        trailing: order.status.toLowerCase() == 'approved'
+                            ? Container(
+                                color: Colors.green,
+                                child: Padding(
+                                  padding: const EdgeInsets.all(8.0),
+                                  child: Text("Order Approved"),
+                                ),
+                              )
+                            : order.status.toLowerCase() == 'rejected'
+                                ? Container(
+                                    color: Colors.red,
+                                    child: Padding(
+                                      padding: const EdgeInsets.all(8.0),
+                                      child: Text("Order Rejected"),
+                                    ),
+                                  )
+                                : Container(
+                                    color: Colors.yellow,
+                                    child: Padding(
+                                      padding: const EdgeInsets.all(8.0),
+                                      child: Text("Order pending"),
+                                    ),
+                                  ),
+                      ),
+                      Divider(
+                        height: 12,
+                      )
+                    ],
+                  ),
                 );
               },
             );
