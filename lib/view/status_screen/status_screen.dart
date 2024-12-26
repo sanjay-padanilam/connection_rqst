@@ -53,25 +53,7 @@ class _HomepageState extends ConsumerState<StatusPage> {
                               color: Colors.red,
                               child: Text("Order Rejected"),
                             )
-                          : Row(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                // ElevatedButton(
-                                //   onPressed: () => ref
-                                //       .read(homePageStateNotifierProvider
-                                //           .notifier)
-                                //       .updateOrderStatus(order.id, 'approved'),
-                                //   child: Text('Approve'),
-                                // ),
-                                // ElevatedButton(
-                                //   onPressed: () => ref
-                                //       .read(homePageStateNotifierProvider
-                                //           .notifier)
-                                //       .updateOrderStatus(order.id, 'rejected'),
-                                //   child: Text('Reject'),
-                                // ),
-                              ],
-                            ),
+                          : Container(),
                 );
               },
             );

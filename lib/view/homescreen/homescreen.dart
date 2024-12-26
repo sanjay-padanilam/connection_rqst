@@ -1,6 +1,7 @@
 import 'package:connection_rqst/controller/homescreen_controller/home_screen_controller.dart';
 import 'package:connection_rqst/controller/homescreen_controller/home_screen_state.dart';
 import 'package:connection_rqst/view/product_details_screen/productdetails_screen.dart';
+import 'package:connection_rqst/view/status_screen/status_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -40,7 +41,13 @@ class _HomescreenState extends ConsumerState<Homescreen> {
           ),
           actions: [
             InkWell(
-              onTap: () {},
+              onTap: () {
+                Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => StatusPage(),
+                    ));
+              },
               child: const Icon(
                 Icons.local_mall_outlined,
                 size: 30,
