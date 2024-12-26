@@ -194,91 +194,23 @@ class _ProductdetailsScreenState extends ConsumerState<ProductdetailsScreen> {
                           ),
                           InkWell(
                             onTap: () async {
-                              final user = FirebaseAuth.instance.currentUser;
-                              final userId = user!.uid;
-
-                              await FirebaseFirestore.instance
-                                  .collection('user') // The collection
-                                  .doc(
-                                      userId) // The document with the user's ID
-                                  .update({
-                                'status': 'pending',
-                                'admin1Status': 'pending',
-                                'admin2Status': 'pending',
-                                'timestamp': DateTime.now(),
-                              }).then((_) {
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  SnackBar(
-                                    content: Text('Order placed successfully!'),
-                                  ),
-                                );
-                              }).catchError((error) {
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  SnackBar(
-                                    content:
-                                        Text('Failed to place order: $error'),
-                                  ),
-                                );
-                              });
-
-                              if (user != null) {
-                                try {
-                                  final docRef = FirebaseFirestore.instance
-                                      .collection("user")
-                                      .doc(user.uid);
-
-                                  // Fetch the document to check if it exists
-                                  final docSnapshot = await docRef.get();
-                                  if (docSnapshot.exists) {
-                                    // Document exists, perform an update
-                                    await docRef.update({
-                                      'productId': FieldValue.arrayUnion([
-                                        productdetailsstate.productdetails?.id
-                                            .toString()
-                                      ]), // Use `arrayUnion` to avoid duplicates in an array
-                                    });
-                                    ScaffoldMessenger.of(context).showSnackBar(
-                                      SnackBar(
-                                        content: Text(
-                                            "Product updated successfully!"),
-                                      ),
-                                    );
-                                  } else {
-                                    // Document does not exist, create it
-                                    await docRef.set({
-                                      'productId': [
-                                        productdetailsstate.productdetails?.id
-                                            .toString()
-                                      ],
-                                    });
-                                    ScaffoldMessenger.of(context).showSnackBar(
-                                      SnackBar(
-                                        content:
-                                            Text("Product added successfully!"),
-                                      ),
-                                    );
-                                  }
-                                } catch (e) {
-                                  ScaffoldMessenger.of(context).showSnackBar(
-                                    SnackBar(
-                                      content:
-                                          Text("Failed to update product: $e"),
-                                    ),
-                                  );
-                                }
-                              } else {
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  SnackBar(
-                                    content: Text("User not logged in"),
-                                  ),
-                                );
-                              }
-
                               // Navigator.push(
                               //     context,
                               //     MaterialPageRoute(
                               //       builder: (context) => StatusScreen(),
                               //     ));
+
+                              User? user = FirebaseAuth.instance.currentUser;
+
+                              ref
+                                  .read(ProductdetailsProvider.notifier)
+                                  .addOrder(
+                                      id: user!.uid.toString(),
+                                      productId: productdetailsstate
+                                          .productdetails!.id
+                                          .toString(),
+                                      email: user.email.toString(),
+                                      status: 'pendng');
                             },
                             child: Container(
                               height: 50,
