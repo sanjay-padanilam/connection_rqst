@@ -28,7 +28,6 @@ class RegistrationScreenStateNotifier
       );
 
       if (credential.user?.uid != null) {
-        // Uncomment the following lines if you wish to store the user in Firestore:
         FirebaseFirestore.instance
             .collection("user")
             .doc(credential.user!.uid)
@@ -71,7 +70,6 @@ class RegistrationScreenStateNotifier
       state = state.copyWith(isLoading: false);
     }
 
-    // Return false if the function didn't exit successfully earlier
     return false;
   }
 }
